@@ -1,0 +1,56 @@
+import 'dotenv/config';
+import { createExpressApp } from '@presentation/http/ExpressApp.js';
+import { initializeMessaging, shutdownMessaging } from '@infrastructure/instances.js';
+
+const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3001;
+
+/**
+ * Application Entry Point
+ * Initialize and start the HTTP server
+ */
+async function bootstrap() {
+  console.log('Orders Service initialized with Clean Architecture + SAGA Pattern');
+  console.log('Domain Layer: Entities, Value Objects, Interfaces');
+  console.log('Application Layer: Use Cases, Commands, Sagas');
+  console.log('Presentation Layer: Controllers');
+  console.log('Infrastructure Layer: Repositories, Event Publishers');
+  console.log('\n📦 SAGA Pattern: Async order creation with Product Service integration');
+
+  // Initialize RabbitMQ messaging
+  await initializeMessaging();
+
+  // Create and start Express server
+  const app = createExpressApp();
+
+  const server = app.listen(PORT, () => {
+    console.log(`\n🚀 Server running on http://localhost:${PORT}`);
+    console.log(`📋 Health check: http://localhost:${PORT}/health`);
+    console.log(`🛒 Orders API: http://localhost:${PORT}/api/orders`);
+    console.log(`\nEndpoints:`);
+    console.log(`  POST   /api/orders              - Create new order`);
+    console.log(`  GET    /api/orders/:id          - Get order by ID`);
+    console.log(`  GET    /api/orders?customerId=x - Get orders by customer`);
+  });
+
+  // Graceful shutdown
+  process.on('SIGTERM', () => {
+    console.log('📢 SIGTERM signal received: closing HTTP server');
+    server.close(() => {
+      console.log('🔒 HTTP server closed');
+      void shutdownMessaging().then(() => process.exit(0));
+    });
+  });
+
+  process.on('SIGINT', () => {
+    console.log('📢 SIGINT signal received: closing HTTP server');
+    server.close(() => {
+      console.log('🔒 HTTP server closed');
+      void shutdownMessaging().then(() => process.exit(0));
+    });
+  });
+}
+
+void bootstrap().catch((error) => {
+  console.error('Failed to start application:', error);
+  process.exit(1);
+});
