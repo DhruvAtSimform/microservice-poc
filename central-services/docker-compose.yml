@@ -1,0 +1,42 @@
+version: "3.8"
+
+services:
+  rabbitmq:
+    image: rabbitmq:3.12-management-alpine
+    container_name: microservices-rabbitmq
+    hostname: rabbitmq
+    ports:
+      # AMQP protocol port
+      - "5672:5672"
+      # Management UI port
+      - "15672:15672"
+    environment:
+      # Default credentials
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin123
+      # Enable management plugin
+      RABBITMQ_MANAGEMENT_PLUGIN: "true"
+      # Virtual host
+      RABBITMQ_DEFAULT_VHOST: /
+    volumes:
+      # Persist RabbitMQ data
+      - rabbitmq_data:/var/lib/rabbitmq
+      # Custom configuration (optional)
+      - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - microservices-network
+    restart: unless-stopped
+
+volumes:
+  rabbitmq_data:
+    driver: local
+
+networks:
+  microservices-network:
+    driver: bridge
