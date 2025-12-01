@@ -261,12 +261,6 @@ cd ../orders-service
 pnpm prisma:migrate
 ```
 
-### 4. Uncomment RabbitMQ Code
-
-In both services, edit `src/infrastructure/messaging/RabbitMQService.ts`:
-
-- Uncomment sections marked with `// TODO: Uncomment when amqplib is installed`
-
 ### 5. Start Services
 
 ```bash

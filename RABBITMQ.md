@@ -141,44 +141,7 @@ protected async handleEvent(eventType: string, payload: unknown): Promise<void> 
    pnpm add amqplib
    pnpm add -D @types/amqplib
    ```
-
-### Switching to RabbitMQ
-
-1. **Uncomment RabbitMQ implementation** in `infrastructure/instances.ts`:
-
-   ```typescript
-   // Change from:
-   export const eventPublisher = new InMemoryEventPublisher();
-
-   // To:
-   export const eventPublisher = new RabbitMQEventPublisher(
-     rabbitMQService,
-     rabbitMQConfig
-   );
-   ```
-
-2. **Uncomment RabbitMQ code** in `RabbitMQService.ts`:
-
-   - Uncomment the actual amqplib import and connection code
-   - Remove the simulation logs
-
-3. **Start the services**:
-   ```bash
-   pnpm dev
-   ```
-
-## Current State
-
-Currently, the RabbitMQ infrastructure is **defined but not active**:
-
-- ✅ All interfaces and classes are created
-- ✅ Configuration is loaded from environment
-- ✅ Services use `InMemoryEventPublisher` by default
-- ⚠️ RabbitMQ connection is simulated (logs only)
-- ⚠️ Actual amqplib code is commented out
-
-This allows the services to run without requiring RabbitMQ to be installed or running.
-
+   
 ## Graceful Shutdown
 
 Both services implement graceful shutdown to properly close RabbitMQ connections:
